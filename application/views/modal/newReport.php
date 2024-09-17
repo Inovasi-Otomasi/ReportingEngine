@@ -9,9 +9,9 @@
   <label class="form-text">Select Template</label>
   <select class="form-select" name="template_id" aria-label="Default select example">
     <option selected>Open this select menu</option>
-    <option value="1">One</option>
-    <option value="2">Two</option>
-    <option value="3">Three</option>
+    <?php foreach($template as $tmp):?>
+    <option value="<?= $tmp->id ?>"><?= $tmp->name ?></option>
+    <?php endforeach; ?>
   </select>
   
   <div class="mb-1">
