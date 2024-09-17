@@ -15,21 +15,23 @@ class Process extends CI_Controller {
     private function queryVar($query_string, $get_variables) {
         // Regular expression to find placeholders in the format ${something}
         $pattern = '/\$\{([a-zA-Z0-9_]+)\}/';
-
+    
         // Callback function to replace placeholders with $_GET values
         $callback = function($matches) use ($get_variables) {
             $key = $matches[1]; // Get the key inside ${}
             if (isset($get_variables[$key])) {
                 $value = $get_variables[$key];
-                // Check if the value is numeric and return it without quotes
-                return is_numeric($value) ? $value : $this->db->escape($value);
+                // Decode the value and check if it is numeric
+                $decoded_value = urldecode($value);
+                // Return the value without quotes if it's numeric; escape otherwise
+                return is_numeric($decoded_value) ? $decoded_value : $this->db->escape($decoded_value);
             }
             return $matches[0];
         };
-
+    
         // Replace placeholders in the query string
         $replaced_query = preg_replace_callback($pattern, $callback, $query_string);
-
+    
         // Return the modified query string
         return $replaced_query;
     }
