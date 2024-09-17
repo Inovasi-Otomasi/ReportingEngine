@@ -243,7 +243,8 @@ class Process extends CI_Controller {
         } else if($table == 'query'){
             $data = $this->input->post();
 
-            if($data['query'] == "") $data["query"] = "[]";
+            // if($data['query'] == "") $data["query"] = "[]";
+            unset($data['query']);
 
             if($this->db->set($data)->where('id',$id)->update('query')){
                 echo"done";
