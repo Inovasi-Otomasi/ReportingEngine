@@ -249,8 +249,7 @@ class Process extends CI_Controller {
                 echo"done";
             } else {
                 $data = ['reason' => ['Name is Used!']];
-                // echo json_encode($data);
-                // echo json_encode($data);
+                echo json_encode($data);
             }
         } else if($table == 'array'){
             $data = $this->input->post();
