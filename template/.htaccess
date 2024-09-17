@@ -1,0 +1,12 @@
+# Deny access to this folder and all its contents
+
+<Directory "./template">
+Order Deny,Allow
+Deny from all
+</Directory>
+
+# Or for modern Apache versions, you can use this syntax:
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>

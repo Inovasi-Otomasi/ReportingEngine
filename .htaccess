@@ -1,0 +1,4 @@
+RewriteEngine On
+
+# Check if the URI starts with "/report"
+RewriteRule ^report(/.*)?$ /Reporting/index.php/report [L]
