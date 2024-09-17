@@ -83,7 +83,7 @@ class Dashboard extends CI_Controller {
 					$this->load->view('modal/editReport', $return);
 				} else {
 					$return['template'] = $this->db->get('template')->result();
-					$this->load->view('modal/newReport');
+					$this->load->view('modal/newReport', $return);
 				}
 			  	break;
 			case 'editor':
