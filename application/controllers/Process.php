@@ -248,8 +248,8 @@ class Process extends CI_Controller {
             if($this->db->set($data)->where('id',$id)->update('query')){
                 echo"done";
             } else {
-                // $data = ['reason' => ['Name is Used!']];
-                echo json_encode($data);
+                $data = ['reason' => ['Name is Used!']];
+                // echo json_encode($data);
                 // echo json_encode($data);
             }
         } else if($table == 'array'){
