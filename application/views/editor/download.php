@@ -172,7 +172,7 @@
                     max += parseInt(n.count)
                     })
                     max += limit;
-                    let prog = 100 * (doneCount/max)
+                    let prog = 30 * (doneCount/max)
                     loader(prog)
                     if(nQuery < counter.length){
                         if(process < parseInt(counter[nQuery].count)){
@@ -208,20 +208,21 @@
                             getData()
                         }
                     } else {
-                        loader(100);
+                        loader(30);
                         doner();
                     }
                 }
 
-                function loader(width){
-                    if(width > 100){
-                        width = 100
-                    }
-                    $(".loading-bar").css('width',width+'%');
-                }
-
+                
             });
 
+            function loader(width){
+                if(width > 100){
+                    width = 100
+                }
+                $(".loading-bar").css('width',width+'%');
+            }
+            
             function doner(){
                 // console.log(functions.function6());
                 reps = processName(reps)
@@ -273,35 +274,81 @@
                 submitForm(report)
             }
 
+            function splitData(data) {
+                const MAX_CELLS = 100; // Maximum number of cells per chunk
+                const resultArray = []; // Final array to hold chunks of data
+                
+                // Loop over each sheet in the input object
+                for (const sheetName in data) {
+                    if (data.hasOwnProperty(sheetName)) {
+                    const sheetData = data[sheetName];
+                    const cellKeys = Object.keys(sheetData); // Get all cell keys (A1, A2, ...)
+                    
+                    // Split the cellKeys into chunks of size MAX_CELLS
+                    for (let i = 0; i < cellKeys.length; i += MAX_CELLS) {
+                        const chunk = cellKeys.slice(i, i + MAX_CELLS); // Get a chunk of cells
+                        
+                        // Create a new object for this chunk
+                        const chunkObject = {
+                        [sheetName]: {}
+                        };
+                        
+                        // Add the chunked cells to the new object
+                        chunk.forEach(cellKey => {
+                        chunkObject[sheetName][cellKey] = sheetData[cellKey];
+                        });
+                        
+                        // Push this chunk to the final result array
+                        resultArray.push(chunkObject);
+                    }
+                    }
+                }
+
+                return resultArray;
+                }
+
             function submitForm(report) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '<?= base_url("index.php/editor/generate/") ?>';
+                let data = splitData(report);
+                let partition = 0;
+                setExcel('./template/upload/' + file)
 
-                const dataInput = document.createElement('input');
-                dataInput.type = 'hidden';
-                dataInput.name = 'data';
-                dataInput.value = JSON.stringify(report);
-                form.appendChild(dataInput);
-
-                const nameInput = document.createElement('input');
-                nameInput.type = 'hidden';
-                nameInput.name = 'name';
-                nameInput.value = reps;
-                form.appendChild(nameInput);
-
-                const fileInput = document.createElement('input');
-                fileInput.type = 'hidden';
-                fileInput.name = 'file';
-                fileInput.value = file;
-                form.appendChild(fileInput);
-
-                document.body.appendChild(form);
-
-                form.submit();
-            }
-
-        </script>
+                function setExcel(excelfile){
+                    let prog = 30 + (70 * partition/data.length);
+                    loader(prog)
+                    if(partition < data.length){
+                        $.ajax({
+                            type: "POST",
+                            url: '<?= base_url("index.php/editor/generate/") ?>',
+                            data: {
+                                file:excelfile, data: JSON.stringify(data[partition])
+                            },
+                            success: function(res) {
+                                partition++;
+                                setExcel(res)
+                            }
+                        });
+                    } else {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '<?= base_url("index.php/editor/download/") ?>';
         
+                        const nameInput = document.createElement('input');
+                        nameInput.type = 'hidden';
+                        nameInput.name = 'name';
+                        nameInput.value = reps;
+                        form.appendChild(nameInput);
+        
+                        const fileInput = document.createElement('input');
+                        fileInput.type = 'hidden';
+                        fileInput.name = 'file';
+                        fileInput.value = excelfile;
+                        form.appendChild(fileInput);
+        
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                }
+            }
+        </script>
     </body>
 </html>

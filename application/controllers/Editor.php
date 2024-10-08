@@ -13,8 +13,25 @@ class Editor extends CI_Controller {
         
     }
 
+    public function download(){
+        $file = $this->input->post('file');
+        $spreadsheet = $this->reader($file);
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->setIncludeCharts(true);
+        $writer->setPreCalculateFormulas(false);
+        
+        
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="'.$this->input->post('name').'.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output'); 
+        
+        unlink($file);
+    }
+
     public function generate(){
-        $spreadsheet = $this->reader("./template/upload/" . $this->input->post('file'));
+        $file = $this->input->post('file');
+        $spreadsheet = $this->reader($file);
         $style = [];
         $data = json_decode( $this->input->post('data'), true);
         foreach($data as $sheet => $cell ){
@@ -32,9 +49,9 @@ class Editor extends CI_Controller {
             }
         }
 
-        $filename = $this->input->post('name');
-        $this->writer($spreadsheet, $filename);
+        $path = $this->tempSave($spreadsheet, $file);
 
+        echo $path;
     }
 
     private function reader($file_path){
@@ -45,16 +62,21 @@ class Editor extends CI_Controller {
         return $ss;
     }
 
-    private function writer($ss, $filename){
+    private function tempSave($ss, $file) {
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($ss, 'Xlsx');
         $writer->setIncludeCharts(true);
         $writer->setPreCalculateFormulas(false);
         
+        $filePath = './template/temp/' . bin2hex(openssl_random_pseudo_bytes(32)) . '.xlsx';
         
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="'.$filename.'.xlsx"');
-        header('Cache-Control: max-age=0');
-        $writer->save('php://output'); 
+        $writer->save($filePath);
+        
+        $explode = explode('/template/temp', $file);
+
+        if(count($explode) > 1){
+            unlink($file);
+        }
+        return $filePath;
     }
 
     private function style($style){
